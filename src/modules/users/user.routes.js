@@ -5,13 +5,14 @@ async function routes(fastify, options) {
 
     fastify.get(
         "/profile",
-        { preHandler: authMiddleware },
+        {
+            preHandler: authMiddleware,
+            schema: {
+                security: [{ bearerAuth: [] }]
+            }
+        },
         async (request, reply) => {
-
-            reply.send({
-                user: request.user
-            });
-
+            reply.send({ user: request.user });
         }
     );
 
