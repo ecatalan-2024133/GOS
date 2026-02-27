@@ -6,57 +6,65 @@ require("dotenv").config();
 
 const connectDB = require("./config/db");
 
-// swagger
-const swagger = require("@fastify/swagger");
-const swaggerUI = require("@fastify/swagger-ui");
-
-// routes
+// importar rutas
 const authRoutes = require("./modules/auth/auth.routes");
 const userRoutes = require("./modules/users/user.routes");
+const postRoutes = require("./modules/posts/post.routes");
 
-// registrar swagger PRIMERO
-fastify.register(swagger, {
-    openapi: {
-        openapi: "3.0.0",
-        info: {
-            title: "Gestor Opiniones API",
-            description: "API del sistema de opiniones",
-            version: "1.0.0"
-        }
-    }
-});
-
-fastify.register(swaggerUI, {
-    routePrefix: "/docs",
-    exposeRoute: true
-});
-
-
-// registrar rutas DESPUÉS
-fastify.register(authRoutes, { prefix: "/api/auth" });
-fastify.register(userRoutes, { prefix: "/api/users" });
-
-
-// start server
 const start = async () => {
 
     try {
 
-        await connectDB();
-
-        await fastify.listen({
-            port: process.env.PORT || 3000
+        // registrar swagger
+        await fastify.register(require("@fastify/swagger"), {
+            openapi: {
+                openapi: "3.0.0",
+                info: {
+                    title: "Gestor Opiniones API",
+                    version: "1.0.0"
+                },
+                components: {
+                    securitySchemes: {
+                        bearerAuth: {
+                            type: "http",
+                            scheme: "bearer",
+                            bearerFormat: "JWT"
+                        }
+                    }
+                },
+                security: [
+                    {
+                        bearerAuth: []
+                    }
+                ]
+            }
         });
 
-        console.log("Servidor corriendo");
+    await fastify.register(require("@fastify/swagger-ui"), {
+        routePrefix: "/docs"
+    });
 
-    } catch (error) {
+    // conectar DB
+    connectDB();
 
-        fastify.log.error(error);
-        process.exit(1);
+    // registrar rutas
+    fastify.register(authRoutes, { prefix: "/api/auth" });
+    fastify.register(userRoutes, { prefix: "/api/users" });
+    fastify.register(postRoutes, { prefix: "/api/posts" });
 
-    }
+    // iniciar servidor
+    await fastify.listen({
+        port: process.env.PORT || 3000
+    });
 
+    console.log("Servidor corriendo en puerto 3000");
+
+} catch (error) {
+
+    fastify.log.error(error);
+    process.exit(1);
+
+}
 };
 
 start();
