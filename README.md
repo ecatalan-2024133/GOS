@@ -13,6 +13,10 @@
 - pnpm add fastify mongoose bcrypt jsonwebtoken dotenv
 - pnpm add -D nodemon
 
+# Ruta para ingresar a Fastify
+
+http://localhost:3000/docs
+
 # Funcionamiento del código 
 
 ## Login
