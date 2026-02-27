@@ -20,9 +20,16 @@ exports.createPost = async (data, userId) => {
 // LISTAR POSTS
 exports.getPosts = async () => {
 
-    return await Post.find()
-        .populate("author", "username email")
-        .sort({ createdAt: -1 });
+    return await Post
+        .find()
+        .populate("author", "username email") // trae datos del autor
+        .populate({
+            path: "comments",
+            populate: {
+                path: "author",
+                select: "username"
+            }
+        });
 
 };
 
@@ -30,11 +37,22 @@ exports.getPosts = async () => {
 // OBTENER POST POR ID
 exports.getPostById = async (id) => {
 
-    const post = await Post.findById(id)
-        .populate("author", "username email");
+    const post = await Post
+        .findById(id)
+        .populate("author", "username email")
+        .populate({
+            path: "comments",
+            populate: {
+                path: "author",
+                select: "username"
+            }
+        });
 
-    if (!post)
-        throw new Error("Post no encontrado");
+    if (!post) {
+        const error = new Error("Post no encontrado");
+        error.statusCode = 404;
+        throw error;
+    }
 
     return post;
 };

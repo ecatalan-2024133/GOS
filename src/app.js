@@ -10,6 +10,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./modules/auth/auth.routes");
 const userRoutes = require("./modules/users/user.routes");
 const postRoutes = require("./modules/posts/post.routes");
+const commentRoutes = require("./modules/comments/comment.routes");
 
 const start = async () => {
 
@@ -51,6 +52,8 @@ const start = async () => {
     fastify.register(authRoutes, { prefix: "/api/auth" });
     fastify.register(userRoutes, { prefix: "/api/users" });
     fastify.register(postRoutes, { prefix: "/api/posts" });
+    fastify.register(commentRoutes, { prefix: "/api/comments" });
+    fastify.setErrorHandler(require("./middleware/error.middleware"));
 
     // iniciar servidor
     await fastify.listen({
